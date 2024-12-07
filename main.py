@@ -12,7 +12,7 @@ import pymunk  # Import Pymunk library
 import sys
 from settings import *
 import random
-import static_item
+import statics
 import dynamic_item
 import sugar_grain
 import bucket
@@ -75,9 +75,12 @@ class Game:
         for item in self.statics:
             item.delete() 
         self.sugar_grains = []
-        self.drawing_lines = []  # Clear the list
+        self.drawing_lines = []  
         self.buckets = []
         self.statics = []
+        self.data = {}  
+        self.level_spout_position = (0, 0) 
+        self.current_level = None 
  
         new_level = LEVEL_FILE_NAME.replace("X", str(levelnumber))
         self.level = level.Level(new_level)
@@ -100,26 +103,26 @@ class Game:
                 
             # Load static items
             for nb in self.level.data['statics']:
-                self.statics.append(static_item.StaticItem(self.space, nb['x1'], nb['y1'], nb['x2'], nb['y2'], nb['color'], nb['line_width'], nb['friction'], nb['restitution']))
-            self.total_sugar_count = self.level.data['number_sugar_grains']
-            pg.time.set_timer(START_FLOW, 5 * 1000)  # 5 seconds
-            self.message_display.show_message("Level Up", 10)
-            self.level_complete = False
-            return True
+                self.statics.append(statics.StaticItem(self.space, nb['x1'], nb['y1'], nb['x2'], nb['y2'], nb['color'], nb['line_width'], nb['friction'], nb['restitution']))
+                self.total_sugar_count = self.level.data['number_sugar_grains']
+                pg.time.set_timer(START_FLOW, 5 * 1000)  # 5 seconds
+                self.message_display.show_message("Level Up", 10)
+                self.level_complete = False
+                return True
 
     def build_main_walls(self):
         '''Build the walls, ceiling, and floor of the screen'''
         # Floor
-        floor = static_item.StaticItem(self.space, 0, 0, WIDTH, 0, 'red', 5)
+        floor = statics.StaticItem(self.space, 0, 0, WIDTH, 0, 'red', 5)
         self.statics.append(floor)
         # Left Wall
-        left_wall = static_item.StaticItem(self.space, 0, 0, 0, HEIGHT, 'red')
+        left_wall = statics.StaticItem(self.space, 0, 0, 0, HEIGHT, 'red')
         self.statics.append(left_wall)
         # Right Wall
-        right_wall = static_item.StaticItem(self.space, WIDTH, 0, WIDTH, HEIGHT, 'red')
+        right_wall = statics.StaticItem(self.space, WIDTH, 0, WIDTH, HEIGHT, 'red')
         self.statics.append(right_wall)
         # Ceiling
-        ceiling = static_item.StaticItem(self.space, 0, HEIGHT, WIDTH, HEIGHT, 'red')
+        ceiling = statics.StaticItem(self.space, 0, HEIGHT, WIDTH, HEIGHT, 'red')
         self.statics.append(ceiling)
     
     def check_all_buckets_exploded(self):
