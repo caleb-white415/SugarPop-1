@@ -87,7 +87,11 @@ class Game:
             return False
         else:  # Do final steps to start the level
             self.level_grain_dropping = False
-            self.level_spout_position = (self.level.data['spout_x'], self.level.data['spout_y'])
+            self.level_spout_position = (
+            self.data.get('spout_x', 0),  # Default to 0 if 'spout_x' is missing
+            self.data.get('spout_y', 0)   # Default to 0 if 'spout_y' is missing
+            )
+
             self.build_main_walls()
 
             # Load buckets
@@ -157,8 +161,8 @@ class Game:
             # First, explode or reset the counter on each bucket
             for i in range(len(self.buckets)-1, -1, -1):
                 bucket = self.buckets[i]
-            if bucket.count >= bucket.needed_sugar:
-                bucket.explode(self.sugar_grains)
+                if bucket.count >= bucket.needed_sugar:
+                    bucket.explode(self.sugar_grains)
                 del self.buckets[i]
                     # If all the buckets are gone, level up!
                 if not self.level_complete and self.check_all_buckets_exploded():

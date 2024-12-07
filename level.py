@@ -8,6 +8,7 @@
 
 import json
 import os
+from HUD import *
 
 class Level:
     def __init__(self, level_file=None):
@@ -23,12 +24,15 @@ class Level:
             "buckets": [],
             "time_to_complete_level": 0,
         }
+        self.statics = level_file.get('statics', [])
+        self.buckets = level_file.get('buckets', [])
         
-        if level_file and os.path.exists(level_file):
-            self.load_level(level_file)
+        if not isinstance(level_file, str):  # Ensure level_file is a string
+                raise TypeError(f"Expected a file path (str), got {type(level_file).__name__} instead.")
+        
+    
         else:
-            print(f"Level file not found: {level_file}")
-            self.data = {}
+            (f"Level file not found: {level_file}")
 
     def load_level(self, level_file):
         """
@@ -37,6 +41,13 @@ class Level:
         try:
             with open(level_file, 'r') as f:
                 self.data = json.load(f)
+                self.level = Level(self.data)  # Load level data from the JSON file
+                self.buckets = []
+                self.set_time_to_complete = 60
+                self.level_spout_position = (
+                self.level.data.get('spout_x', 0),  # Default to 0 if 'spout_x' is missing
+                self.level.data.get('spout_y', 0)
+                )
         except (FileNotFoundError, json.JSONDecodeError) as e:
             print(f"Error loading level: {e}")
             self.data = {}

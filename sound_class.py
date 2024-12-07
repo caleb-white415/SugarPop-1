@@ -4,8 +4,8 @@ class SoundManager:
     def __init__(self):
         self.sounds = {
             'exploding_bucket' : pg.mixer.Sound('explosion.wav'),
-            'add_sugar' : pg.mixer.Sound ('add_sugar.wav'),
-            'complete_level' : pg.mixer.Sound('complete_level')
+            'add_sugar' : pg.mixer.Sound ('add_sugar.ogg'),
+            'complete_level' : pg.mixer.Sound('level_complete.wav')
         }
 
 
