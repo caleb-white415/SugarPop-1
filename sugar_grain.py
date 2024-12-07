@@ -59,6 +59,8 @@ class sugar_grain:
         pos = self.body.position
         screen_x = pos.x * SCALE
         screen_y = HEIGHT - pos.y * SCALE
+ 
+
 
         # Draw a small square at this position
         pg.draw.rect(screen, pg.Color('white'), (screen_x - 1, screen_y - 1, 2, 2))

@@ -23,11 +23,14 @@ class Bucket:
         :param width: Width of the bucket in pixels.
         :param height: Height of the bucket in pixels.
         """
+        self.x = x
+        self.y = y
         self.space = space
         self.width = width / SCALE
         self.height = height / SCALE
         self.count = 0  # Counter for collected sugar grains
         self.needed_sugar = needed_sugar
+        self.collected_sugar = 0
 
         wall_thickness = 0.2  # Thickness of the walls in physics units
 
@@ -117,6 +120,10 @@ class Bucket:
         pg.draw.line(screen, color, to_pygame(self.right_wall.a), to_pygame(self.right_wall.b), 2)
         pg.draw.line(screen, color, to_pygame(self.bottom_wall.a), to_pygame(self.bottom_wall.b), 2)
 
+        font = pg.font.SysFont(None, 24)
+        remaining_sugar = max(0, self.needed_sugar - self.collected_sugar)
+        text = font.render(f"{remaining_sugar}", True, pg.Color('white'))
+
     def count_reset(self):
         if not self.exploded:
             self.count = 0
@@ -144,6 +151,9 @@ class Bucket:
             return True  # Indicate that the grain was collected
 
         return False  # Grain not collected
+   
+    
+
 
     def delete(self):
         if not self.exploded:

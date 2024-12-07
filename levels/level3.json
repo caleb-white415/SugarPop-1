@@ -2,10 +2,10 @@
     "number_sugar_grains": 200,
     "statics": [
         {
-            "x1": 0,
-            "y1": 150,
-            "x2": 80,
-            "y2": 150,
+            "x1": 100,
+            "y1": 500,
+            "x2": 300,
+            "y2": 250,
             "color": "gray",
             "line_width": 3,
             "friction": 0.3,
@@ -68,7 +68,8 @@
             "y": 180,
             "width": 40,
             "height": 40,
-            "needed_sugar": 30
+            "needed_sugar": 30,
+            "explodes" : true
         },
         {
             "x": 50,
@@ -106,7 +107,7 @@
             "needed_sugar": 30
         }
     ],
-    "spout_x": 512,
-    "spout_y": 790,
+    "spout_x": 300,
+    "spout_y": 650,
     "time_to_complete_level": 120
 }

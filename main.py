@@ -18,11 +18,15 @@ import sugar_grain
 import bucket
 import level
 import message_display
+import HUD
+from sound_class import SoundManager
 
 
 class Game:
     def __init__(self) -> None:
         pg.init()
+        pg.mixer.init()
+        self.sound_class = SoundManager()
         self.screen = pg.display.set_mode(RES)
         self.clock = pg.time.Clock()
         self.iter = 0
@@ -49,6 +53,8 @@ class Game:
         self.mouse_down = False
         self.current_line = None
         self.message_display = message_display.MessageDisplay(font_size=72)
+        self.gravity_up = False
+
         
         # Load the intro image
         self.intro_image = pg.image.load("./images/SugarPop.png").convert()  # Load the intro image
@@ -149,11 +155,13 @@ class Game:
             
             # Calculate buckets count by counting each grain's position
             # First, explode or reset the counter on each bucket
-            for bucket in self.buckets:
-                if bucket.count >= bucket.needed_sugar:
-                    bucket.explode(self.sugar_grains)
+            for i in range(len(self.buckets)-1, -1, -1):
+                bucket = self.buckets[i]
+            if bucket.count >= bucket.needed_sugar:
+                bucket.explode(self.sugar_grains)
+                del self.buckets[i]
                     # If all the buckets are gone, level up!
-                    if not self.level_complete and self.check_all_buckets_exploded():
+                if not self.level_complete and self.check_all_buckets_exploded():
                         self.level_complete = True
                         self.message_display.show_message("Level Complete!", 2)
                         pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Schedule next level load
