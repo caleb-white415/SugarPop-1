@@ -31,15 +31,14 @@ class Game:
         self.clock = pg.time.Clock()
         self.iter = 0
         
-        # Initialize font for HUD
-        self.font = pg.font.SysFont(None, 36)  # Default font, size 36
+        
+        self.font = pg.font.SysFont(None, 36)  
 
-        # Create a Pymunk space with gravity
-        self.current_level = 0 # Start game at 0
+        self.FPS = 60
+        self.current_level = 1
         self.level_complete = False
         self.space = pymunk.Space()
-        self.space.gravity = (0, -9)  # Gravity pointing downwards in Pymunk's coordinate system
-        # Iterations defaults to 10. Higher is more accurate collison detection
+        self.space.gravity = (0, -9)  
         self.space.iterations = 30 
         self.is_paused = False
 
@@ -54,20 +53,24 @@ class Game:
         self.current_line = None
         self.message_display = message_display.MessageDisplay(font_size=72)
         self.gravity_up = False
+        self.exploded = False
 
         
-        # Load the intro image
-        self.intro_image = pg.image.load("./images/SugarPop.png").convert()  # Load the intro image
-        # Get new height based on correct scale
-        scale_height = self.intro_image.get_height() * WIDTH / self.intro_image.get_width()
-        self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  # Scale to screen resolution
         
-        pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Load in 2 seconds
+        self.intro_image = pg.image.load("./images/SugarPop.png").convert() 
+        
+        scale_height = self.intro_image.get_height() * WIDTH / self.intro_image.get_width()
+        self.intro_image = pg.transform.scale(self.intro_image, (WIDTH, int(scale_height)))  
+        
+        pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  
+
+    def explode(self):
+        self.exploded = True
 
     def load_level(self, levelnumber=0):
-        # Destroy any current game objects
+        
         for item in self.sugar_grains:
-            item.delete()  # Delete all sugar grains
+            item.delete() 
         for item in self.drawing_lines:
             item.delete() 
         for item in self.buckets:
@@ -80,15 +83,15 @@ class Game:
         self.statics = []
         self.data = {}  
         self.level_spout_position = (0, 0) 
-        self.current_level = None 
+        self.current_level += 0
  
         new_level = LEVEL_FILE_NAME.replace("X", str(levelnumber))
         self.level = level.Level(new_level)
         
-        # Make sure the file was found
+        
         if not self.level or not self.level.data:
             return False
-        else:  # Do final steps to start the level
+        else:  
             self.level_grain_dropping = False
             self.level_spout_position = (
             self.data.get('spout_x', 0),  # Default to 0 if 'spout_x' is missing
@@ -129,7 +132,11 @@ class Game:
         """
         Check if all buckets have exploded.
         """
-        return all(bucket.exploded for bucket in self.buckets)
+        for bucket in self.buckets:
+            if not bucket.exploded:  
+                return False  
+            return True  
+
 
     def update(self):
         '''Update the program physics'''
@@ -137,50 +144,50 @@ class Game:
         if self.is_paused:
             return
         
-        # Keep an overall iterator
+        
         self.iter += 1
         
-        # Calculate time since last frame
-        delta_time = self.clock.tick(FPS) / 1000.0  # Convert milliseconds to seconds
+        
+        delta_time = self.clock.tick(FPS) / 1000.0  
 
-        # Cap delta_time to prevent instability from large time steps
+       
         time_step = min(delta_time, MAX_TIME_STEP)
 
-        # Step the physics simulation forward with the calculated time_step
+        
         self.space.step(time_step)
         
-        # Update our game counter
         if self.iter == 60:
             self.iter = 0
 
         pg.display.set_caption(f'fps: {self.clock.get_fps():.1f}')
         
-        # Only do the following every 20 frames for less system stress
+        
         if self.iter % 20 == 0:
-            # Update any messages
+            
             self.message_display.update()
             
-            # Calculate buckets count by counting each grain's position
-            # First, explode or reset the counter on each bucket
-            for i in range(len(self.buckets)-1, -1, -1):
-                bucket = self.buckets[i]
-                if bucket.count >= bucket.needed_sugar:
-                    bucket.explode(self.sugar_grains)
-                del self.buckets[i]
-                    # If all the buckets are gone, level up!
-                if not self.level_complete and self.check_all_buckets_exploded():
-                        self.level_complete = True
-                        self.message_display.show_message("Level Complete!", 2)
-                        pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  # Schedule next level load
-                else:
-                    bucket.count_reset()
-            # Count the grains in the un-exploded buckets
-            for grain in self.sugar_grains:
+    
+        for bucket in self.buckets:
+            if bucket.count >= bucket.needed_sugar:
+                bucket.explode(self.sugar_grains)  
+            if not bucket.exploded:  
+                bucket.exploded = True
+            else:
+                bucket.count_reset() 
+
+
+        if not self.level_complete and self.check_all_buckets_exploded():
+            self.level_complete = True
+            self.message_display.show_message("Level Complete!", 3)
+            pg.time.set_timer(LOAD_NEW_LEVEL, 2000)  
+
+           
+        for grain in self.sugar_grains:
                 for bucket in self.buckets:
                     bucket.collect(grain)
                 
             # Drop sugar if needed
-            if self.level_grain_dropping:
+        if self.level_grain_dropping:
                 # Create new sugar to drop
                 new_sugar = sugar_grain.sugar_grain(self.space, self.level_spout_position[0], self.level_spout_position[1], 0.1)
                 self.sugar_grains.append(new_sugar)
@@ -291,12 +298,12 @@ class Game:
                 pg.time.set_timer(START_FLOW, 0)
                 
             elif event.type == LOAD_NEW_LEVEL:
-                pg.time.set_timer(LOAD_NEW_LEVEL, 0)  # Clear the timer
+                pg.time.set_timer(LOAD_NEW_LEVEL, 0)  
                 self.intro_image = None
                 self.current_level += 1
                 if not self.load_level(self.current_level):
-                    self.message_display.show_message("You Win!", 5)  # End of game message
-                    pg.time.set_timer(EXIT_APP, 5000)  # Quit game after 5 seconds
+                    self.message_display.show_message("You Win!", 5)  
+                    
                 else:
                     self.message_display.show_message(f"Level {self.current_level} Start!", 2)
                     
@@ -306,6 +313,8 @@ class Game:
             self.check_events()
             self.update()
             self.draw()
+            self.clock.tick(FPS)
+
 
 def main():
     game = Game()
